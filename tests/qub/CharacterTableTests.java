@@ -815,7 +815,7 @@ public interface CharacterTableTests
                 {
                     runner.test("with " + table, (Test test) ->
                     {
-                        final InMemoryCharacterStream stream = new InMemoryCharacterStream();
+                        final InMemoryCharacterToByteStream stream = new InMemoryCharacterToByteStream();
                         final int charactersWritten = table.toString(stream).await();
                         test.assertEqual(expected, stream.getText().await());
                         test.assertEqual(expected.length(), charactersWritten);
@@ -869,7 +869,7 @@ public interface CharacterTableTests
                 runner.test("with null stream", (Test test) ->
                 {
                     final CharacterTable table = CharacterTable.create();
-                    final InMemoryCharacterStream stream = null;
+                    final InMemoryCharacterToByteStream stream = null;
                     final CharacterTableFormat format = CharacterTableFormat.create();
                     test.assertThrows(() -> table.toString(stream, format),
                         new PreConditionFailure("writeStream cannot be null."));
@@ -878,7 +878,7 @@ public interface CharacterTableTests
                 runner.test("with null format", (Test test) ->
                 {
                     final CharacterTable table = CharacterTable.create();
-                    final InMemoryCharacterStream stream = new InMemoryCharacterStream();
+                    final InMemoryCharacterToByteStream stream = new InMemoryCharacterToByteStream();
                     final CharacterTableFormat format = null;
                     test.assertThrows(() -> table.toString(stream, format),
                         new PreConditionFailure("format cannot be null."));
@@ -888,7 +888,7 @@ public interface CharacterTableTests
                 {
                     runner.test("with " + English.andList(table, format), (Test test) ->
                     {
-                        final InMemoryCharacterStream stream = new InMemoryCharacterStream();
+                        final InMemoryCharacterToByteStream stream = new InMemoryCharacterToByteStream();
                         final int charactersWritten = table.toString(stream, format).await();
                         test.assertEqual(expected, stream.getText().await());
                         test.assertEqual(expected.length(), charactersWritten);

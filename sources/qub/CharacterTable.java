@@ -72,7 +72,7 @@ public class CharacterTable
     {
         PreCondition.assertNotNull(format, "format");
 
-        final InMemoryCharacterStream characterStream = new InMemoryCharacterStream();
+        final InMemoryCharacterToByteStream characterStream = new InMemoryCharacterToByteStream();
         this.toString(characterStream, format).await();
         return characterStream.getText().await();
     }
@@ -105,48 +105,6 @@ public class CharacterTable
 
             final Indexable<Integer> columnWidths = CharacterTable.getColumnWidths(this.rows);
             final int columnCount = columnWidths.getCount();
-//
-//            int totalColumnWidth = 0;
-//            for (final int columnWidth : columnWidths)
-//            {
-//                totalColumnWidth += columnWidth;
-//            }
-//
-//            final Iterable<String> rowColumnSeparatorJunction = CharacterTable.getPadded(format.getRowColumnSeparatorJunction());
-//            final String columnSeparator = format.getColumnSeparator();
-//            final int rowColumnSeparatorJunctionWidth = CharacterTable.getWidth(rowColumnSeparatorJunction);
-//            final int columnSeparatorWidth = Math.maximum(Strings.getLength(columnSeparator), rowColumnSeparatorJunctionWidth);
-//            final int totalColumnSeparatorWidth = (columnWidths.getCount() - 1) * columnSeparatorWidth;
-//
-//            final Iterable<String> topLeftBorderCorner = CharacterTable.getPadded(format.getTopLeftBorderCorner());
-//            final Iterable<String> bottomLeftBorderCorner = CharacterTable.getPadded(format.getBottomLeftBorderCorner());
-//            final String leftBorder = format.getLeftBorder();
-//            final int topLeftBorderCornerWidth = CharacterTable.getWidth(topLeftBorderCorner);
-//            final int bottomLeftBorderCornerWidth = CharacterTable.getWidth(bottomLeftBorderCorner);
-//            final int leftBorderWidth = CharacterTable.maximum(Strings.getLength(leftBorder), topLeftBorderCornerWidth, bottomLeftBorderCornerWidth);
-//
-//            final Iterable<String> topRightBorderCorner = CharacterTable.getPadded(format.getTopRightBorderCorner());
-//            final Iterable<String> bottomRightBorderCorner = CharacterTable.getPadded(format.getBottomRightBorderCorner());
-//            final String rightBorder = format.getRightBorder();
-//            final int topRightBorderCornerWidth = CharacterTable.getWidth(topRightBorderCorner);
-//            final int bottomRightBorderCornerWidth = CharacterTable.getWidth(bottomRightBorderCorner);
-//            final int rightBorderWidth = CharacterTable.maximum(Strings.getLength(rightBorder), topRightBorderCornerWidth, bottomRightBorderCornerWidth);
-//
-//            final int tableWidth = leftBorderWidth + totalColumnSeparatorWidth + totalColumnWidth + rightBorderWidth;
-//
-//            final Iterable<Character> topBorder = format.getTopBorder();
-//
-//            final Iterator<String> topLeftBorderCornerIterator = topLeftBorderCorner.iterate();
-//            final Iterator<Character> topBorderIterator = topBorder.iterate();
-//            final Iterator<String> topRightBorderCornerIterator = topRightBorderCorner.iterate();
-//            while (topLeftBorderCornerIterator.next() | topBorderIterator.next() | topRightBorderCornerIterator.next())
-//            {
-//
-//            }
-//            for (int i = 0; i < topBorder.getCount(); ++i)
-//            {
-//                writeStream.write(topLeftBorderCorner)
-//            }
 
             final String newLine = format.getNewLine();
             final boolean hasNewLine = !Strings.isNullOrEmpty(newLine);
