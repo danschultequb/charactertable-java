@@ -416,6 +416,140 @@ public interface CharacterTableFormatTests
                 setBottomBorderTest.run(Iterable.create(' ', ' ', ' ', ' '));
             });
 
+            runner.testGroup("setColumnHorizontalAlignment(int,HorizontalAlignment)", () ->
+            {
+                final Action3<Integer,HorizontalAlignment,Throwable> setColumnHorizontalAlignmentErrorTest = (Integer columnIndex, HorizontalAlignment horizontalAlignment, Throwable expected) ->
+                {
+                    runner.test("with " + English.andList(columnIndex, horizontalAlignment), (Test test) ->
+                    {
+                        final CharacterTableFormat format = CharacterTableFormat.create();
+                        test.assertThrows(() -> format.setColumnHorizontalAlignment(columnIndex, horizontalAlignment), expected);
+                    });
+                };
+
+                setColumnHorizontalAlignmentErrorTest.run(-1, HorizontalAlignment.Left,
+                    new PreConditionFailure("columnIndex (-1) must be greater than or equal to 0."));
+                setColumnHorizontalAlignmentErrorTest.run(0, null,
+                    new PreConditionFailure("horizontalAlignment cannot be null."));
+
+                final Action2<Integer,HorizontalAlignment> setColumnHorizontalAlignmentTest = (Integer columnIndex, HorizontalAlignment horizontalAlignment) ->
+                {
+                    runner.test("with " + English.andList(columnIndex, horizontalAlignment), (Test test) ->
+                    {
+                        final CharacterTableFormat format = CharacterTableFormat.create();
+                        final CharacterTableFormat setColumnHorizontalAlignmentResult = format.setColumnHorizontalAlignment(columnIndex, horizontalAlignment);
+                        test.assertSame(format, setColumnHorizontalAlignmentResult);
+                        test.assertEqual(horizontalAlignment, format.getColumnHorizontalAlignment(columnIndex).await());
+                    });
+                };
+
+                setColumnHorizontalAlignmentTest.run(0, HorizontalAlignment.Left);
+                setColumnHorizontalAlignmentTest.run(0, HorizontalAlignment.Center);
+                setColumnHorizontalAlignmentTest.run(0, HorizontalAlignment.Right);
+                setColumnHorizontalAlignmentTest.run(1, HorizontalAlignment.Left);
+                setColumnHorizontalAlignmentTest.run(2, HorizontalAlignment.Center);
+
+                runner.test("with columnIndex that already has alignment", (Test test) ->
+                {
+                    final CharacterTableFormat format = CharacterTableFormat.create();
+
+                    format.setColumnHorizontalAlignment(0, HorizontalAlignment.Left);
+                    test.assertEqual(HorizontalAlignment.Left, format.getColumnHorizontalAlignment(0).await());
+
+                    format.setColumnHorizontalAlignment(0, HorizontalAlignment.Right);
+                    test.assertEqual(HorizontalAlignment.Right, format.getColumnHorizontalAlignment(0).await());
+                });
+            });
+
+            runner.testGroup("getColumnHorizontalAlignment(int)", () ->
+            {
+                runner.test("when no alignments have been set", (Test test) ->
+                {
+                    final CharacterTableFormat format = CharacterTableFormat.create();
+                    test.assertThrows(() -> format.getColumnHorizontalAlignment(0).await(),
+                        new NotFoundException("No horizontal alignment assigned to the column at index 0."));
+                });
+
+                runner.test("when a different column has had its alignment set", (Test test) ->
+                {
+                    final CharacterTableFormat format = CharacterTableFormat.create()
+                        .setColumnHorizontalAlignment(1, HorizontalAlignment.Center);
+                    test.assertThrows(() -> format.getColumnHorizontalAlignment(0).await(),
+                        new NotFoundException("No horizontal alignment assigned to the column at index 0."));
+                });
+
+                runner.test("when an alignment exists for the requested column", (Test test) ->
+                {
+                    final CharacterTableFormat format = CharacterTableFormat.create()
+                        .setColumnHorizontalAlignment(1, HorizontalAlignment.Center);
+                    test.assertEqual(HorizontalAlignment.Center, format.getColumnHorizontalAlignment(1).await());
+                });
+            });
+
+            runner.testGroup("padCell(int,String,int)", () ->
+            {
+                final Action4<Integer,String,Integer,Throwable> padCellErrorTest = (Integer columnIndex, String text, Integer columnWidth, Throwable expected) ->
+                {
+                    runner.test("with " + English.andList(columnIndex, text, columnWidth), (Test test) ->
+                    {
+                        final CharacterTableFormat format = CharacterTableFormat.create();
+                        test.assertThrows(() -> format.padCell(columnIndex, text, columnWidth), expected);
+                    });
+                };
+
+                padCellErrorTest.run(-1, "", 5, new PreConditionFailure("columnIndex (-1) must be greater than or equal to 0."));
+                padCellErrorTest.run(0, null, 5, new PreConditionFailure("cellText cannot be null."));
+                padCellErrorTest.run(0, "hello", -1, new PreConditionFailure("columnWidth (-1) must be greater than or equal to 0."));
+
+                final Action5<HorizontalAlignment,Integer,String,Integer,String> padCellTest = (HorizontalAlignment columnHorizontalAlignment, Integer columnIndex, String cellText, Integer columnWidth, String expected) ->
+                {
+                    runner.test("with " + English.andList(columnHorizontalAlignment, columnIndex, cellText, columnWidth), (Test test) ->
+                    {
+                        final CharacterTableFormat format = CharacterTableFormat.create();
+                        if (columnHorizontalAlignment != null)
+                        {
+                            format.setColumnHorizontalAlignment(columnIndex, columnHorizontalAlignment);
+                        }
+                        test.assertEqual(expected, format.padCell(columnIndex, cellText, columnWidth));
+                    });
+                };
+
+                padCellTest.run(null, 0, "", 0, "");
+                padCellTest.run(HorizontalAlignment.Left, 0, "", 0, "");
+                padCellTest.run(HorizontalAlignment.Center, 0, "", 0, "");
+                padCellTest.run(HorizontalAlignment.Right, 0, "", 0, "");
+
+                padCellTest.run(null, 1, "abc", 0, "abc");
+                padCellTest.run(HorizontalAlignment.Left, 1, "abc", 0, "abc");
+                padCellTest.run(HorizontalAlignment.Center, 1, "abc", 0, "abc");
+                padCellTest.run(HorizontalAlignment.Right, 1, "abc", 0, "abc");
+
+                padCellTest.run(null, 2, "abc", 3, "abc");
+                padCellTest.run(HorizontalAlignment.Left, 2, "abc", 3, "abc");
+                padCellTest.run(HorizontalAlignment.Center, 2, "abc", 3, "abc");
+                padCellTest.run(HorizontalAlignment.Right, 2, "abc", 3, "abc");
+
+                padCellTest.run(null, 3, "abc", 4, "abc ");
+                padCellTest.run(HorizontalAlignment.Left, 3, "abc", 4, "abc ");
+                padCellTest.run(HorizontalAlignment.Center, 3, "abc", 4, "abc ");
+                padCellTest.run(HorizontalAlignment.Right, 3, "abc", 4, " abc");
+
+                padCellTest.run(null, 4, "abc", 5, "abc  ");
+                padCellTest.run(HorizontalAlignment.Left, 4, "abc", 5, "abc  ");
+                padCellTest.run(HorizontalAlignment.Center, 4, "abc", 5, " abc ");
+                padCellTest.run(HorizontalAlignment.Right, 4, "abc", 5, "  abc");
+
+                padCellTest.run(null, 5, "abc", 6, "abc   ");
+                padCellTest.run(HorizontalAlignment.Left, 5, "abc", 6, "abc   ");
+                padCellTest.run(HorizontalAlignment.Center, 5, "abc", 6, " abc  ");
+                padCellTest.run(HorizontalAlignment.Right, 5, "abc", 6, "   abc");
+
+                padCellTest.run(null, 6, "abc", 7, "abc    ");
+                padCellTest.run(HorizontalAlignment.Left, 6, "abc", 7, "abc    ");
+                padCellTest.run(HorizontalAlignment.Center, 6, "abc", 7, "  abc  ");
+                padCellTest.run(HorizontalAlignment.Right, 6, "abc", 7, "    abc");
+            });
+
             runner.testGroup("toString()", () ->
             {
                 runner.test("singleLine", (Test test) ->
@@ -444,6 +578,23 @@ public interface CharacterTableFormatTests
                     test.assertEqual(
                         "{}",
                         CharacterTableFormat.create().setColumnSeparator("").toString());
+                });
+
+                runner.test("with one column horizontal alignment", (Test test) ->
+                {
+                    test.assertEqual(
+                        "{\"columnHorizontalAlignment\":{\"6\":\"Right\"}}",
+                        CharacterTableFormat.create().setColumnHorizontalAlignment(6, HorizontalAlignment.Right).toString());
+                });
+
+                runner.test("with multiple column horizontal alignments", (Test test) ->
+                {
+                    test.assertEqual(
+                        "{\"columnHorizontalAlignment\":{\"4\":\"Center\",\"6\":\"Right\"}}",
+                        CharacterTableFormat.create()
+                            .setColumnHorizontalAlignment(6, HorizontalAlignment.Right)
+                            .setColumnHorizontalAlignment(4, HorizontalAlignment.Center)
+                            .toString());
                 });
             });
 
@@ -571,6 +722,26 @@ public interface CharacterTableFormatTests
                 equalsTest.run(
                     CharacterTableFormat.create().setBottomBorder('a'),
                     CharacterTableFormat.create().setBottomBorder('a'),
+                    true);
+                equalsTest.run(
+                    CharacterTableFormat.create().setColumnHorizontalAlignment(0, HorizontalAlignment.Center),
+                    CharacterTableFormat.create(),
+                    false);
+                equalsTest.run(
+                    CharacterTableFormat.create(),
+                    CharacterTableFormat.create().setColumnHorizontalAlignment(0, HorizontalAlignment.Center),
+                    false);
+                equalsTest.run(
+                    CharacterTableFormat.create().setColumnHorizontalAlignment(0, HorizontalAlignment.Left),
+                    CharacterTableFormat.create().setColumnHorizontalAlignment(0, HorizontalAlignment.Center),
+                    false);
+                equalsTest.run(
+                    CharacterTableFormat.create().setColumnHorizontalAlignment(0, HorizontalAlignment.Center),
+                    CharacterTableFormat.create().setColumnHorizontalAlignment(1, HorizontalAlignment.Center),
+                    false);
+                equalsTest.run(
+                    CharacterTableFormat.create().setColumnHorizontalAlignment(0, HorizontalAlignment.Center),
+                    CharacterTableFormat.create().setColumnHorizontalAlignment(0, HorizontalAlignment.Center),
                     true);
             });
 

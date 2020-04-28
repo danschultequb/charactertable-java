@@ -72,7 +72,7 @@ public class CharacterTable
     {
         PreCondition.assertNotNull(format, "format");
 
-        final InMemoryCharacterToByteStream characterStream = new InMemoryCharacterToByteStream();
+        final InMemoryCharacterToByteStream characterStream = InMemoryCharacterToByteStream.create();
         this.toString(characterStream, format).await();
         return characterStream.getText().await();
     }

@@ -33,6 +33,7 @@ public class CharacterTableFormat
     private String rightBorder;
     private Iterable<Character> topBorder;
     private Iterable<Character> bottomBorder;
+    private MutableMap<Integer,HorizontalAlignment> columnHorizontalAlignment;
 
     private CharacterTableFormat()
     {
@@ -296,6 +297,96 @@ public class CharacterTableFormat
         return this.bottomBorder;
     }
 
+    /**
+     * Set the horizintal alignment of the cells within the provided column index.
+     * @param columnIndex The index of the column to align.
+     * @param horizontalAlignment The horizontal alignment of the cells within the provided column.
+     * @return This object for method chaining.
+     */
+    public CharacterTableFormat setColumnHorizontalAlignment(int columnIndex, HorizontalAlignment horizontalAlignment)
+    {
+        PreCondition.assertGreaterThanOrEqualTo(columnIndex, 0, "columnIndex");
+        PreCondition.assertNotNull(horizontalAlignment, "horizontalAlignment");
+
+        if (this.columnHorizontalAlignment == null)
+        {
+            this.columnHorizontalAlignment = Map.create();
+        }
+        this.columnHorizontalAlignment.set(columnIndex, horizontalAlignment);
+
+        return this;
+    }
+
+    /**
+     * Get the horizontal alignment for the column at the provided index.
+     * @param columnIndex The index of the column to get the horizontal alignment for.
+     * @return The horizontal alignment for the provided index.
+     */
+    public Result<HorizontalAlignment> getColumnHorizontalAlignment(int columnIndex)
+    {
+        PreCondition.assertGreaterThanOrEqualTo(columnIndex, 0, "columnIndex");
+
+        return Result.create(() ->
+        {
+            HorizontalAlignment result = this.columnHorizontalAlignment == null
+                ? null
+                : this.columnHorizontalAlignment.get(columnIndex)
+                    .catchError(NotFoundException.class)
+                    .await();
+            if (result == null)
+            {
+                throw new NotFoundException("No horizontal alignment assigned to the column at index " + columnIndex + ".");
+            }
+
+            PostCondition.assertNotNull(result, "result");
+
+            return result;
+        });
+    }
+
+    public String padCell(int columnIndex, String cellText, int columnWidth)
+    {
+        PreCondition.assertGreaterThanOrEqualTo(columnIndex, 0, "columnIndex");
+        PreCondition.assertNotNull(cellText, "cellText");
+        PreCondition.assertGreaterThanOrEqualTo(columnWidth, 0, "columnWidth");
+
+        final HorizontalAlignment columnHorizontalAlignment = this.getColumnHorizontalAlignment(columnIndex)
+            .catchError(NotFoundException.class, () -> HorizontalAlignment.Left)
+            .await();
+
+        String result;
+
+        final int cellTextLength = cellText.length();
+        if (columnWidth <= cellTextLength)
+        {
+            result = cellText;
+        }
+        else
+        {
+            switch (columnHorizontalAlignment)
+            {
+                case Left:
+                    result = Strings.padRight(cellText, columnWidth, ' ');
+                    break;
+
+                case Right:
+                    result = Strings.padLeft(cellText, columnWidth, ' ');
+                    break;
+
+                default:
+                    final int cellWidthDifference = columnWidth - cellTextLength;
+                    result = Strings.padLeft(cellText, cellTextLength + (cellWidthDifference / 2), ' ');
+                    result = Strings.padRight(result, columnWidth, ' ');
+                    break;
+            }
+        }
+
+        PostCondition.assertNotNull(result, "result");
+        PostCondition.assertGreaterThanOrEqualTo(result.length(), columnWidth, "result.length()");
+
+        return result;
+    }
+
     @Override
     public String toString()
     {
@@ -309,6 +400,21 @@ public class CharacterTableFormat
         CharacterTableFormat.addProperty(result, "rightBorder", this.rightBorder);
         CharacterTableFormat.addProperty(result, "topBorder", this.topBorder);
         CharacterTableFormat.addProperty(result, "bottomBorder", this.bottomBorder);
+        if (!Iterable.isNullOrEmpty(this.columnHorizontalAlignment))
+        {
+            result.addAll(Strings.escapeAndQuote("columnHorizontalAlignment"));
+            result.add(':');
+            result.add('{');
+
+            final Iterable<Integer> columnIndexes = this.columnHorizontalAlignment.getKeys()
+                .order(Comparer::lessThan);
+            for (final Integer columnIndex : columnIndexes)
+            {
+                CharacterTableFormat.addProperty(result, Integers.toString(columnIndex), this.getColumnHorizontalAlignment(columnIndex).await());
+            }
+
+            result.add('}');
+        }
 
         result.add('}');
         return result.toString(true);
@@ -348,6 +454,8 @@ public class CharacterTableFormat
             Comparer.equal(this.leftBorder, rhs.leftBorder) &&
             Comparer.equal(this.rightBorder, rhs.rightBorder) &&
             Comparer.equal(this.topBorder, rhs.topBorder) &&
-            Comparer.equal(this.bottomBorder, rhs.bottomBorder);
+            Comparer.equal(this.bottomBorder, rhs.bottomBorder) &&
+            ((this.columnHorizontalAlignment == rhs.columnHorizontalAlignment) ||
+                (this.columnHorizontalAlignment != null && this.columnHorizontalAlignment.equals(rhs.columnHorizontalAlignment)));
     }
 }
