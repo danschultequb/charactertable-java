@@ -194,7 +194,7 @@ public class CharacterTable
                     final String cell = cellIterator.next()
                         ? cellIterator.getCurrent()
                         : "";
-                    final String paddedCell = Strings.padRight(cell, columnWidth, ' ');
+                    final String paddedCell = format.padCell(columnIndex, cell, columnWidth);
 
                     result += writeStream.write(paddedCell).await();
                 }

@@ -958,6 +958,32 @@ public interface CharacterTableTests
                         "Tests run:      500        ",
                         "Tests failed:   3          ",
                         "Tests duration: 5   Seconds")));
+                toStringTest.run(
+                    CharacterTable.create()
+                        .addRow("Tests run:", "500")
+                        .addRow("Tests failed:", "3")
+                        .addRow("Tests duration:", "5", "Seconds"),
+                    CharacterTableFormat.create()
+                        .setNewLine('\n')
+                        .setColumnSeparator(' ')
+                        .setColumnHorizontalAlignment(1, HorizontalAlignment.Center),
+                    Strings.join('\n', Iterable.create(
+                        "Tests run:      500        ",
+                        "Tests failed:    3         ",
+                        "Tests duration:  5  Seconds")));
+                toStringTest.run(
+                    CharacterTable.create()
+                        .addRow("Tests run:", "500")
+                        .addRow("Tests failed:", "3")
+                        .addRow("Tests duration:", "5", "Seconds"),
+                    CharacterTableFormat.create()
+                        .setNewLine('\n')
+                        .setColumnSeparator(' ')
+                        .setColumnHorizontalAlignment(1, HorizontalAlignment.Right),
+                    Strings.join('\n', Iterable.create(
+                        "Tests run:      500        ",
+                        "Tests failed:     3        ",
+                        "Tests duration:   5 Seconds")));
 
                 toStringTest.run(
                     CharacterTable.create(),
