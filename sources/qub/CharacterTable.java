@@ -42,7 +42,7 @@ public class CharacterTable
     {
         PreCondition.assertNotNull(rowCells, "rowCells");
 
-        this.rows.add(List.create(rowCells));
+        this.rows.addAll(List.create(rowCells));
 
         return this;
     }
@@ -249,7 +249,7 @@ public class CharacterTable
                 final int cellLength = Strings.getLength(cell);
                 if (columnIndex >= result.getCount())
                 {
-                    result.add(cellLength);
+                    result.addAll(cellLength);
                 }
                 else if (cellLength > result.get(columnIndex))
                 {
