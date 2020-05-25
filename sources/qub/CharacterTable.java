@@ -42,7 +42,7 @@ public class CharacterTable
     {
         PreCondition.assertNotNull(rowCells, "rowCells");
 
-        this.rows.addAll(List.create(rowCells));
+        this.rows.add(List.create(rowCells));
 
         return this;
     }

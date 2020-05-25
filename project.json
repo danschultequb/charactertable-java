@@ -1,14 +1,13 @@
 {
   "publisher": "qub",
   "project": "charactertable-java",
-  "version": "21",
+  "version": "23",
   "java": {
-    "version": "1.8",
     "dependencies": [
       {
         "publisher": "qub",
         "project": "lib-java",
-        "version": "40"
+        "version": "49"
       }
     ]
   }
